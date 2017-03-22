@@ -8,7 +8,7 @@ public class City extends DataSupport {
     private int id;     //字段id.
     private String cityName;    //城市名.
     private int cityCode;   //城市代号.
-    private int provinceId; //城市所属省份代号.
+    private int provinceId; //城市所属省份字段id.
 
     public City() {
     }

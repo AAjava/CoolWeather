@@ -6,10 +6,10 @@ import org.litepal.crud.DataSupport;
  * Created by Administrator on 2017/3/21.
  */
 public class County extends DataSupport {
-    private int id;
-    private String countyName;
-    private String weatherId;
-    private int cityId;
+    private int id; //字段id
+    private String countyName;  //区县名
+    private String weatherId;   //天气id
+    private int cityId; //城市id
 
     public County() {
     }
