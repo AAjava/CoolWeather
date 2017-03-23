@@ -4,10 +4,14 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -28,10 +32,13 @@ import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity {
 
+    public DrawerLayout drawerLayout;
+    private Button navButton;
     private ScrollView weatherLayout;
     private LinearLayout forecastLayout;
     private TextView titleCity, titleUpdateTime, degreeText, weatherInfoText, aqiText, pm25Text, comfortText, carWashText, sportText;
     private ImageView bingPicImg;
+    public SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,31 +71,52 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText = (TextView) this.findViewById(R.id.car_wash_text);
         sportText = (TextView) this.findViewById(R.id.sport_text);
         bingPicImg= (ImageView) this.findViewById(R.id.bing_pic_img);
+        swipeRefreshLayout= (SwipeRefreshLayout) this.findViewById(R.id.swipe_refresh);
+        drawerLayout= (DrawerLayout) this.findViewById(R.id.drawer_layout);
+        navButton= (Button) this.findViewById(R.id.nav_button);
 
     }
 
     private void initData() {
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = preferences.getString("weather", null);
+        final String weatherId;
         if (weatherString != null) {
             //有缓存时直接解析天气
             Weather weather = Utility.handleWeatherResponse(weatherString);
+            weatherId=weather.basic.weatherId;
             showWeatherInfo(weather);
         } else {
             //无缓存时去服务器查询天气
-            String weatherId = getIntent().getStringExtra("weather_id");
+            weatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(weatherId);
         }
+
         String bingPic=preferences.getString("bing_pic",null);
         if(bingPic!=null){
             Glide.with(this).load(bingPic).into(bingPicImg);
         }else{
             loadBingPic();
         }
+
+        //设置下拉刷新控件的监听事件
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestWeather(weatherId);
+            }
+        });
+
+        navButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+
     }
-
-
     /***
      * 根据天气id请求城市天气信息
      *
@@ -103,6 +131,7 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
@@ -122,13 +151,18 @@ public class WeatherActivity extends AppCompatActivity {
                         } else {
                             Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
                         }
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
         });
+
         loadBingPic();
     }
 
+    /***
+     * 先请求图片地址，再使用glide加载图片
+     */
     private void loadBingPic() {
         String requestBingPic="http://guolin.tech/api/bing_pic";
         HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
