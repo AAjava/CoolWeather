@@ -1,5 +1,6 @@
 package com.coolweather.android;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -21,7 +22,9 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.coolweather.android.gson.Forecast;
 import com.coolweather.android.gson.Weather;
+import com.coolweather.android.service.AutoUpdateService;
 import com.coolweather.android.util.HttpUtil;
+import com.coolweather.android.util.LogUtil;
 import com.coolweather.android.util.Utility;
 
 import java.io.IOException;
@@ -193,6 +196,10 @@ public class WeatherActivity extends AppCompatActivity {
      * @param weather
      */
     private void showWeatherInfo(Weather weather) {
+        LogUtil.e("服务准备开启","ok");
+        Intent intent=new Intent(this, AutoUpdateService.class);
+        startService(intent);
+        LogUtil.e("服务已开启","ok");
         String cityName = weather.basic.cityName;
         String updateTime = weather.basic.update.updateName.split(" ")[1];
         String degree = weather.now.temperature + "℃";
