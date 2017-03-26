@@ -35,6 +35,7 @@ import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity {
 
+    public String weatherID;
     public DrawerLayout drawerLayout;
     private Button navButton;
     private ScrollView weatherLayout;
@@ -54,10 +55,8 @@ public class WeatherActivity extends AppCompatActivity {
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
         setContentView(R.layout.activity_weather);
-
         initView();
         initData();
-
     }
 
 
@@ -77,7 +76,6 @@ public class WeatherActivity extends AppCompatActivity {
         swipeRefreshLayout= (SwipeRefreshLayout) this.findViewById(R.id.swipe_refresh);
         drawerLayout= (DrawerLayout) this.findViewById(R.id.drawer_layout);
         navButton= (Button) this.findViewById(R.id.nav_button);
-
     }
 
     private void initData() {
@@ -108,7 +106,7 @@ public class WeatherActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                requestWeather(weatherId);
+                requestWeather(weatherID);
             }
         });
 
